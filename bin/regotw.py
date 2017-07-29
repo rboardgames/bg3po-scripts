@@ -20,8 +20,9 @@ if __name__ == '__main__':
     subreddit = u'boardgames' if not args.subreddit else args.subreddit
 
     reddit = login()
-    
-    gotw_page = reddit.get_wiki_page(subreddit=subreddit, page=wiki_page)
+   
+    gotw_page = reddit.subreddit(subreddit).wiki[wiki_page]
+    #gotw_page = reddit.models.WikiPage(subreddit=subreddit, page=wiki_page)
     gotw_text = html.unescape(gotw_page.content_md)
     log.debug('Found wiki text:\n{}'.format(gotw_text))
 
@@ -68,8 +69,8 @@ if __name__ == '__main__':
             log.debug(u'no GOTW from two years ago. Next GOTW repost is {} on {}'.format(
                 game[1], game[0]))
             exit(0)
-
-    gotw_post = reddit.get_submission(submission_id=game[2], comment_limit=0)
+    submission_id = game[2]
+    gotw_post = reddit.subreddit(id=submission_id)
     search_str = u'\[//]: # \(GOTWS\)\s+(.+)\[//]: # \(GOTWE\)\s+'
     m = re.search(search_str, gotw_post.selftext, flags=re.DOTALL)
     if not m:
