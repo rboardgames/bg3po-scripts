@@ -13,6 +13,7 @@ from GotW import getGotWPostText, updateGotWWiki, updateGotWSidebar, getNotFound
 
 
 log = logging.getLogger('gotw')
+log.setLevel(10)
 
 if __name__ == '__main__':
     '''A simple script that posts the game of the week for /r/boardgames'''
