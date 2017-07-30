@@ -1,4 +1,4 @@
-import logging
+import logging 
 import argparse
 import re
 from sys import exit
@@ -32,11 +32,11 @@ if __name__ == '__main__':
 
     while True:
         try:
-            gotw_wiki = reddit.get_wiki_page(subreddit, wiki_path)
-            break
+          gotw_page = reddit.subreddit(subreddit).wiki[wiki_path]
+          break
         except HTTPError:
             sleep(reddit_retry_timeout)
-
+    gotw_wiki = gotw_page
     log.debug(u'got wiki data: {}'.format(gotw_wiki.content_md))
 
     # finding the next GOTW is done in two parts. Find the wiki chunk, then find the list 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     # grab the voting thread URL from the sidebar.
     vote_thread_url = None
-    sb = reddit.get_settings(subreddit)['description']
+    sb = reddit.subreddit(subreddit).description
     if sb:
         m = re.search('\[Vote here!\]\(/(?P<url>\w+)\)', sb)
         if m and 'url' in m.groupdict():
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # log.debug(u'Posting gotw text: {}'.format(post_text))
     while True:
         try:
-            post = reddit.submit(subreddit, title=title, text=post_text)
+            post = reddit.subreddit(subreddit).submit(title=title, selftext=post_text)
             post.distinguish(as_made_by=u'mod')
             break
         except HTTPError:
