@@ -1,4 +1,4 @@
-import logging
+import logging 
 import argparse
 import re
 from sys import exit
@@ -13,6 +13,7 @@ from GotW import getGotWPostText, updateGotWWiki, updateGotWSidebar, getNotFound
 
 
 log = logging.getLogger('gotw')
+log.setLevel(10)
 
 if __name__ == '__main__':
     '''A simple script that posts the game of the week for /r/boardgames'''
@@ -32,11 +33,11 @@ if __name__ == '__main__':
 
     while True:
         try:
-            gotw_wiki = reddit.get_wiki_page(subreddit, wiki_path)
-            break
+          gotw_page = reddit.subreddit(subreddit).wiki[wiki_path]
+          break
         except HTTPError:
             sleep(reddit_retry_timeout)
-
+    gotw_wiki = gotw_page
     log.debug(u'got wiki data: {}'.format(gotw_wiki.content_md))
 
     # finding the next GOTW is done in two parts. Find the wiki chunk, then find the list 
@@ -87,7 +88,7 @@ if __name__ == '__main__':
 
     # grab the voting thread URL from the sidebar.
     vote_thread_url = None
-    sb = reddit.get_settings(subreddit)['description']
+    sb = reddit.subreddit(subreddit).description
     if sb:
         m = re.search('\[Vote here!\]\(/(?P<url>\w+)\)', sb)
         if m and 'url' in m.groupdict():
@@ -105,8 +106,8 @@ if __name__ == '__main__':
     # log.debug(u'Posting gotw text: {}'.format(post_text))
     while True:
         try:
-            post = reddit.submit(subreddit, title=title, text=post_text)
-            post.distinguish(as_made_by=u'mod')
+            post = reddit.subreddit(subreddit).submit(title=title, selftext=post_text)
+            #post.distinguish(as_made_by=u'mod') //todo, make this distinguished again
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
@@ -118,8 +119,9 @@ if __name__ == '__main__':
         log.info(u'Sending mod mail as there are fewer than 3 games in the GotW queue.')
         while True:
             try:
-                reddit.send_message(u'#' + subreddit, subject=u'Top up the GotW Calendar', 
-                                    message=u'Fewer than three games on the GotW. Please add more.')
+                msg = u'Fewer than three games on the GotW calendar for ' + subreddit + u'. Please add more to ' + wiki_path
+                reddit.subreddit(subreddit).message(subject=u'Top up the GotW Calendar', 
+                                    message=msg)
                 break
             except HTTPError:
                 sleep(reddit_retry_timeout)
@@ -131,8 +133,8 @@ if __name__ == '__main__':
 
     while True:
         try:
-            reddit.edit_wiki_page(subreddit=subreddit, page=wiki_path, content=new_wiki_page,
-                                  reason=u'GotW post update for {}'.format(cal_games[0]))
+            page_to_edit = reddit.subreddit(subreddit).wiki[wiki_path]
+            page_to_edit.edit(content=new_wiki_page, reason=u'GotW post update for {}'.format(cal_games[0]))
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
@@ -140,7 +142,7 @@ if __name__ == '__main__':
     log.info(u'GotW wiki information updated.')
 
     # finally update the sidebar/link menu
-    sidebar = unescape(reddit.get_subreddit(subreddit).get_settings()["description"])
+    sidebar = unescape(reddit.subreddit(subreddit).description)
     new_sidebar = updateGotWSidebar(sidebar, cal_games[0], next_gotw_name, post.id)
     if new_sidebar == sidebar:
         log.critical(u'Error updating the sidebar for GotW.')
@@ -148,7 +150,7 @@ if __name__ == '__main__':
     
     while True:
         try:
-            reddit.get_subreddit(subreddit).update_settings(description=new_sidebar)
+            reddit.subreddit(subreddit).mod.update(description=new_sidebar)
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
