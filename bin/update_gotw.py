@@ -119,8 +119,9 @@ if __name__ == '__main__':
         log.info(u'Sending mod mail as there are fewer than 3 games in the GotW queue.')
         while True:
             try:
-                reddit.send_message(u'#' + subreddit, subject=u'Top up the GotW Calendar', 
-                                    message=u'Fewer than three games on the GotW. Please add more.')
+                msg = u'Fewer than three games on the GotW calendar for ' + subreddit + u'. Please add more to ' + wiki_path
+                reddit.subreddit(subreddit).message(subject=u'Top up the GotW Calendar', 
+                                    message=msg)
                 break
             except HTTPError:
                 sleep(reddit_retry_timeout)
