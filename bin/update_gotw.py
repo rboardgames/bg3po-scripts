@@ -149,7 +149,7 @@ if __name__ == '__main__':
     
     while True:
         try:
-            reddit.subreddit(subreddit).description=new_sidebar
+            reddit.subreddit(subreddit).mod.update(description=new_sidebar)
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
