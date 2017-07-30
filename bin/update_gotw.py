@@ -106,7 +106,7 @@ if __name__ == '__main__':
     while True:
         try:
             post = reddit.subreddit(subreddit).submit(title=title, selftext=post_text)
-            post.distinguish(as_made_by=u'mod')
+            #post.distinguish(as_made_by=u'mod') //todo, make this distinguished again
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
@@ -131,8 +131,8 @@ if __name__ == '__main__':
 
     while True:
         try:
-            reddit.edit_wiki_page(subreddit=subreddit, page=wiki_path, content=new_wiki_page,
-                                  reason=u'GotW post update for {}'.format(cal_games[0]))
+            page_to_edit = reddit.subreddit(subreddit).wiki[wiki_path]
+            page_to_edit.edit(content=new_wiki_page, reason=u'GotW post update for {}'.format(cal_games[0]))
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     log.info(u'GotW wiki information updated.')
 
     # finally update the sidebar/link menu
-    sidebar = unescape(reddit.get_subreddit(subreddit).get_settings()["description"])
+    sidebar = unescape(reddit.subreddit(subreddit).description)
     new_sidebar = updateGotWSidebar(sidebar, cal_games[0], next_gotw_name, post.id)
     if new_sidebar == sidebar:
         log.critical(u'Error updating the sidebar for GotW.')
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     
     while True:
         try:
-            reddit.get_subreddit(subreddit).update_settings(description=new_sidebar)
+            reddit.subreddit(subreddit).description=new_sidebar
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
