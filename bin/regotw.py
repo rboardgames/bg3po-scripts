@@ -70,7 +70,8 @@ if __name__ == '__main__':
                 game[1], game[0]))
             exit(0)
     submission_id = game[2]
-    gotw_post = reddit.subreddit(id=submission_id)
+    gotw_post = reddit.submission(id=submission_id)
+    print("GOTW: ", gotw_post, gotw_post.title)
     search_str = u'\[//]: # \(GOTWS\)\s+(.+)\[//]: # \(GOTWE\)\s+'
     m = re.search(search_str, gotw_post.selftext, flags=re.DOTALL)
     if not m:
@@ -96,5 +97,4 @@ Below is [the original Game of the Week post](/{}) from {}:
     log.debug(u'Reposting this GOTW text:\n{}'.format(repost_text))
 
     title = u'Game of the Week, Redux: {}'.format(game[1])
-    repost = reddit.submit(subreddit, title, text=repost_text)
-    repost.distinguish(as_made_by=u'mod')
+    repost = reddit.subreddit(subreddit).submit(title=title, selftext=repost_text)
