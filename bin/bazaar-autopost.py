@@ -3,6 +3,7 @@ import praw
 from bg3po_oauth import login
 import re
 from datetime import datetime
+from html import unescape
 
 SUBREDDIT = "boardgames"
 POST_BODY = "/home/bg3po/bg3po-scripts/etc/bazaar_post_body.red"
@@ -20,29 +21,26 @@ def get_body():
     return body
 
 
-def post_bazaar(r, month):
-    subject = month + " Board Game Bazaar"
-    body = get_body()
-    post = r.submit(SUBREDDIT, subject, text=body)
-    post.distinguish(as_made_by='mod')
-    # post.set_contest_mode(state=True)
+def post_bazaar(reddit, month):
+    title = month + " Board Game Bazaar"
+    post_text = get_body()
+    post = reddit.subreddit(SUBREDDIT).submit(title=title, selftext=post_text)
     return (post.id)
 
 
-def change_sidebar(r, post_id, month):
-    sr = r.get_subreddit(SUBREDDIT)
-    sb = sr.get_settings()["description"]
+def change_sidebar(reddit, post_id, month):
+    sr = reddit.subreddit(SUBREDDIT)
+    sidebar = unescape(reddit.subreddit(SUBREDDIT).description)
     new_bazaar = r'['+month+' Bazaar](/'+post_id+')'
-    new_sb = re.sub(r'\[[a-zA-Z]+ Bazaar\]\(\/[a-z0-9]+\)', new_bazaar, sb, 1)
-    sr.update_settings(description=new_sb)
+    new_sb = re.sub(r'\[[a-zA-Z]+ Bazaar\]\(\/[a-z0-9]+\)', new_bazaar, sidebar, 1)
+    reddit.subreddit(SUBREDDIT).mod.update(description=new_sb)
 
 
 def main():
     month = get_month()
-    r = login()
-    post_id = post_bazaar(r, month)
-    change_sidebar(r, post_id, month)
+    reddit = login()
+    post_id = post_bazaar(reddit, month)
+    change_sidebar(reddit, post_id, month)
 
-
-if __name__ == '__main__':
+if __name__ ==  '__main__':
     main()
