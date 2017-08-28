@@ -5,12 +5,15 @@
 # recipient
 
 import praw
+from praw.models import Comment, Message
 import sys
+import logging
 import re
 from bg3po_oauth import login
 
-#SUBREDDIT='boardgames'
-SUBREDDIT='bg_tech'
+log = logging.getLogger(__name__)
+
+SUBREDDIT='boardgames'
 AUTOREPLY_MSG = """\
 You have PM'ed /u/bg3po.  This user is a bot account for doing administrative
 tasks for the moderators of /r/boardgames. No human checks this account.
@@ -72,41 +75,50 @@ def set_sticky(r, msg):
     to_stick_or_not_to_stick_that_is_the_question(r, msg, sticky=True)
 
 # all /r/bg mods can execute any command
+# these should be read from somewhere rather than hardcoded. 
 mods = [
     'phil_s_stein',
-    'Epsilon_balls'
+    'Zelbinian'
+    'DaboGirl'
 ]
 
 # specific commands may be executable by non-mods. 
 cmds = {
     'setksru': {
-        'allowed': ['Zelbinian', 'whygook', 'anahuac-a-mole'] + mods,
+        # 'allowed': mods + ['someuser', 'anotheruser']  # non-mod user example
+        'allowed': mods,
         'cmd': set_ks_link
     },
     'sticky post': {
-        'allowed': ['Lazarus1209'] + mods,
+        'allowed': mods,
         'cmd': set_sticky
     },
     'unsticky post': {
-        'allowed': ['Lazarus1209'] + mods,
+        'allowed': mods,
         'cmd': set_unsticky
     }
 }
 
 def main():
     r = login()
+    unread = r.inbox.unread(limit=None)
 
-    for msg in r.get_unread(unset_has_mail=True, update_user=True):
-        if isinstance(msg, praw.objects.Message):
+    for msg in unread:
+        if isinstance(msg, Comment):
+            # this is probably a mention in a comment body. Ignore it.
+            pass
+        elif isinstance(msg, Message):
             # first check for bg3po commands.
             if msg.subject in cmds:
                 if msg.author.name in cmds[msg.subject]['allowed']:
+                    log.info('Handling command {} from {}'.format(msg.subject, msg.author.name))
                     cmds[msg.subject]['cmd'](r, msg)
 
             else:   # All other messages the bg3po get the auto-response.
                 msg.reply(AUTOREPLY_MSG)
 
-            msg.mark_as_read()
+        log.info('Marking bg3po {} as read: {}'.format(msg.__class__, msg))
+        msg.mark_read()
 
 if __name__ == '__main__':
     main()
