@@ -95,14 +95,27 @@ if __name__ == '__main__':
         else:
             suffix = [u"st", u"nd", u"rd"][game[0].day % 10 - 1]
 
+        # If this is the second Redux, search for the previous one and add it if found.
+        if ago == 5:
+            s = reddit.subreddit('boardgames').search('Game of the Week, Redux: {}'.format(game[1]))
+            found = list(s)
+            if len(found):
+                header_extra = 'The previous Redux post might be [found here](/{}). (If the search worked.)'.format(found[0].id)
+            else:
+                header_extra = ''
+        else:
+            header_extra = ''
+
         repost_header = u'''
 Note: {} was Game of the Week on /r/boardgames [{} years ago today](/{}). This GoTW repost gives people of the sub a chance to discuss the game again after a bit of time has passed. Do you still play it? If so, how often does it make it to the table? Has the game held up after repeated plays? Has it moved up or down in your personal ranking? Has it been replaced by a newer, similar game? Has it replaced a game?
+
+{}
 
 Below is [the original Game of the Week post](/{}) from {}:
 
 ------------------
 
-'''.format(game[1], years_ago[ago]['as_string'], game[2], game[2], game[0].strftime(u'%B %d{}, %Y'.format(suffix)))
+'''.format(game[1], years_ago[ago]['as_string'], game[2], header_extra, game[2], game[0].strftime(u'%B %d{}, %Y'.format(suffix)))
 
         repost_text = repost_header + m.group(1)
         log.debug(u'Reposting this GOTW text:\n{}'.format(repost_text))
