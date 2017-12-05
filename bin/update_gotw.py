@@ -107,7 +107,8 @@ if __name__ == '__main__':
     while True:
         try:
             post = reddit.subreddit(subreddit).submit(title=title, selftext=post_text)
-            #post.distinguish(as_made_by=u'mod') //todo, make this distinguished again
+            # post.mod.distinguish()
+            post.mod.flair(text=u'GotW', css_class=u'gotw')
             break
         except HTTPError:
             sleep(reddit_retry_timeout)
