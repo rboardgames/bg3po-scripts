@@ -122,3 +122,4 @@ Below is [the original Game of the Week post](/{}) from {}:
 
         title = u'Game of the Week, {}: {}'.format(years_ago[ago]['title'], game[1])
         repost = reddit.subreddit(subreddit).submit(title=title, selftext=repost_text)
+        repost.mod.distinguish()
