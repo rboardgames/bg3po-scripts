@@ -50,7 +50,7 @@ if __name__ == '__main__':
                         u' delimiters in the page [//]: (CALS) and [//]: (CALE)?'.format(wiki_path))
             while True:
                 try:
-                    reddit.subreddit(subreddit).send_message(
+                    reddit.subreddit(subreddit).message(
                         subject=u'Unable to post GotW',
                         message=u'There was a problem posting the GotW. Take a look at the gotw wiki page. There is something amiss.')
                     break
@@ -71,7 +71,7 @@ if __name__ == '__main__':
             log.info(u'Sending mod mail. We could not find game(s) {}'.format(', '.join(not_found)))
             while True:
                 try:
-                    reddit.subreddit(subreddit).send_message(
+                    reddit.subreddit(subreddit).message(
                         subject=u'Error in GotW Calendar',
                         message=u'Could not find the following game(s) on BGG: {}. Please fix the GotW wiki calendar and re-run the GotW script.'.format(', '.join(not_found)))
                     break
@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     except Exception as e:
         if reddit:
-            reddit.subreddit(subreddit).send_message('gotw script error', 'gotw error: {}. Please fix.'.format(e))
+            reddit.subreddit(subreddit).message('gotw script error', 'gotw error: {}. Please fix.'.format(e))
 
         exit(666)
 
