@@ -15,8 +15,6 @@ def login():
     #I'm parsing the config file because praw isn't....  
     config = configparser.ConfigParser()
     config.read(config_file_name)
-    # todo: make it error out on file missing
-    print("found: ", config.sections(), " if this doens't have bg3po_helper_scripts, you have a generic file")
     bg3po = config['bg3po_helper_scripts']
     log.info('logging into reddit')
     r = praw.Reddit(
